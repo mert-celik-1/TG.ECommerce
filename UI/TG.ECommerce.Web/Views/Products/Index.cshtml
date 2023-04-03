@@ -1,0 +1,117 @@
+﻿@model TG.ECommerce.Web.Models.HomePageIndexViewModel
+
+@{
+    Layout = "_Layout";
+}
+
+
+<div class="row">
+
+
+    <div class="col-md-2" id="categorySelect">
+        @foreach (var category in Model.Categories)
+        {
+            <button class="btn btn-block btn-outline-primary" id="@category.Id">@category.Name</button>
+        }
+    </div>
+
+    <div class="col-md-10" id='productList'>
+    </div>
+
+</div>
+
+
+@section Scripts{
+
+
+    <script>
+
+        $(document).ready(function () {
+
+
+            $.ajax({
+                method: "GET",
+                dataType: "json",
+                url: "../Products/GetProducts",
+
+                success: function (c) {
+                    DataToProductCard(c)
+
+                },
+                error: function (data) {
+                    console.log(data);
+                }
+            });
+
+
+            // get value from category list button and send api to get product by category
+            $(".btn-outline-primary").click(function () {
+                var categoryId = $(this).attr("id");
+                $.ajax({
+                    method: "GET",
+                    dataType: "json",
+                    url: "../Products/GetProductsByCategory",
+                    data: { id: categoryId },
+
+                    success: function (c) {
+                        DataToProductCard(c)
+                    },
+                    error: function (data) {
+                        console.log(data);
+                    }
+                })
+            });
+
+
+        });
+
+
+        function DataToProductCard(c) {
+            const container = document.getElementById('productList');
+
+            var div3Content = '';
+            $("#productList").empty();
+
+            for (var i = 0; i < c.data.length; i++) {
+                // Create card element
+                const card = document.createElement('div');
+                card.classList = 'card-body';
+
+                // Construct card content
+                const content = `
+                                <div class="card">
+                                        <div class="card-header" id="heading-${c.data[i].id}">
+                                    <h5 class="mb-0">
+                                                            <img src="https://egecotton.com/images/shopping.jpg" alt="ExamplePhoto" width="800" height="600">
+
+                                    </h5>
+                                </div>
+
+                                        <div id="collapse-${c.data[i].id}" class="collapse show" aria-labelledby="heading-${c.data[i].id}" data-parent="#accordion">
+                                    <div class="card-body">
+
+                                            <h5>${c.data[i].name}</h5>
+                                            <p>${c.data[i].description}</p>
+                                            <p>${c.data[i].price}TL</p>
+
+
+                                    </div>
+                                </div>
+                                </div>
+                                `;
+
+                // Append newyly created card element to the container
+                container.innerHTML += content;
+            }
+            $("#productList").append(div3Content);
+
+        }
+
+
+
+    </script>
+
+
+
+}
+
